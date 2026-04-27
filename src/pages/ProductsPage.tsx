@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useMemo, useState } from "react";
 import { formatVnd } from "@/lib/format";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SORTS = [
   { value: "popular", label: "Phổ biến" },
@@ -19,12 +19,14 @@ const SORTS = [
   { value: "price-desc", label: "Giá giảm dần" },
   { value: "rating", label: "Đánh giá cao" },
 ];
+const PAGE_SIZE = 12;
 
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const categoryId = params.get("category") || "all";
   const search = params.get("search") || "";
   const sort = (params.get("sort") as any) || "popular";
+  const page = parseInt(params.get("page") || "1");
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 60_000_000]);
   const [brand, setBrand] = useState<string>("all");
@@ -35,21 +37,32 @@ export default function ProductsPage() {
   const { data, isLoading } = useProducts({
     categoryId, search, sort, brand,
     minPrice: priceRange[0], maxPrice: priceRange[1],
-    pageSize: 24,
+    page, pageSize: PAGE_SIZE,
   });
 
+  // Need brands list (from full unfiltered set within current category)
+  const { data: brandsData } = useProducts({ categoryId, pageSize: 100 });
   const brands = useMemo(() => {
-    const s = new Set(data?.items.map((p) => p.brand));
+    const s = new Set(brandsData?.items.map((p) => p.brand));
     return Array.from(s);
-  }, [data]);
+  }, [brandsData]);
 
   const updateParam = (k: string, v: string) => {
     const next = new URLSearchParams(params);
     if (!v || v === "all") next.delete(k); else next.set(k, v);
+    if (k !== "page") next.delete("page"); // reset page on filter change
     setParams(next, { replace: true });
   };
 
+  const goPage = (p: number) => {
+    const next = new URLSearchParams(params);
+    next.set("page", String(p));
+    setParams(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const activeCategory = categories?.find((c) => c.id === categoryId);
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
 
   return (
     <div className="container py-6 md:py-10">
@@ -119,12 +132,25 @@ export default function ProductsPage() {
               <span>{formatVnd(priceRange[1])}</span>
             </div>
           </div>
+
+          <div className="pt-3 border-t">
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">Đánh giá</label>
+            <div className="space-y-1">
+              {[5, 4, 3].map((s) => (
+                <label key={s} className="flex items-center gap-2 text-sm cursor-pointer hover:text-secondary">
+                  <input type="checkbox" className="accent-secondary" /> Từ {s} sao trở lên
+                </label>
+              ))}
+            </div>
+          </div>
         </aside>
 
         {/* Results */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-muted-foreground">Sắp xếp theo</span>
+            <span className="text-sm text-muted-foreground">
+              Hiển thị {data ? Math.min((page - 1) * PAGE_SIZE + 1, data.total) : 0}–{data ? Math.min(page * PAGE_SIZE, data.total) : 0} / {data?.total ?? 0}
+            </span>
             <Select value={sort} onValueChange={(v) => updateParam("sort", v)}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -138,9 +164,41 @@ export default function ProductsPage() {
               {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-lg" />)}
             </div>
           ) : data && data.items.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 animate-fade-in">
-              {data.items.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 animate-fade-in">
+                {data.items.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-1.5">
+                  <Button variant="outline" size="icon" disabled={page === 1} onClick={() => goPage(page - 1)}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const p = i + 1;
+                    // show first, last, current ±1, ellipsis
+                    const show = p === 1 || p === totalPages || Math.abs(p - page) <= 1;
+                    const showEllipsis = (p === page - 2 || p === page + 2) && totalPages > 5;
+                    if (!show && !showEllipsis) return null;
+                    if (showEllipsis) return <span key={p} className="px-2 text-muted-foreground">…</span>;
+                    return (
+                      <Button
+                        key={p}
+                        variant={p === page ? "default" : "outline"}
+                        size="icon"
+                        className={p === page ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground" : ""}
+                        onClick={() => goPage(p)}
+                      >
+                        {p}
+                      </Button>
+                    );
+                  })}
+                  <Button variant="outline" size="icon" disabled={page === totalPages} onClick={() => goPage(page + 1)}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-20 text-muted-foreground">Không tìm thấy sản phẩm phù hợp.</div>
           )}

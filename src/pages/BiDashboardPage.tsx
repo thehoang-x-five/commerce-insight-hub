@@ -10,7 +10,7 @@ import {
 import { formatCompactVnd, formatNumber, formatPercent, formatVnd } from "@/lib/format";
 import {
   ResponsiveContainer, AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis,
-  Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend,
+  Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, ScatterChart, Scatter, ZAxis,
 } from "recharts";
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, DollarSign, Activity, Target,
@@ -32,6 +32,7 @@ export default function BiDashboardPage() {
   const [range, setRange] = useState("30");
   const [channel, setChannel] = useState<string>("all");
   const [region, setRegion] = useState<string>("all");
+  const [topSearch, setTopSearch] = useState("");
 
   const filters: BiFilters = useMemo(() => {
     const days = parseInt(range);
@@ -83,7 +84,15 @@ export default function BiDashboardPage() {
               <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
               <SelectContent>{REGIONS.map((r) => <SelectItem key={r} value={r}>{r === "all" ? "Toàn quốc" : r}</SelectItem>)}</SelectContent>
             </Select>
-            <Button size="sm" variant="outline"><Download className="h-3.5 w-3.5 mr-1" /> Export</Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              if (!series) return;
+              const rows = [["Ngày","Doanh thu","Đơn hàng","Lượt truy cập"], ...series.map(s => [s.date, String(s.revenue), String(s.orders), String(s.visitors)])];
+              const csv = "\uFEFF" + rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = `bi-revenue-${Date.now()}.csv`; a.click();
+              URL.revokeObjectURL(url);
+            }}><Download className="h-3.5 w-3.5 mr-1" /> Export CSV</Button>
           </div>
         </div>
       </header>
@@ -197,19 +206,35 @@ export default function BiDashboardPage() {
           </Card>
         </section>
 
-        {/* Conversion / visitors mini */}
-        <section className="grid lg:grid-cols-3 gap-4">
-          <Card className="p-5 lg:col-span-3">
+        {/* Conversion / visitors / scatter */}
+        <section className="grid lg:grid-cols-2 gap-4">
+          <Card className="p-5">
             <h3 className="font-display font-bold mb-1">Lưu lượng truy cập</h3>
             <p className="text-xs text-muted-foreground mb-3">Operational — theo dõi sức khỏe traffic hằng ngày</p>
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={220}>
               <LineChart data={series}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" tickFormatter={(v) => v.slice(5)} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-                <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatCompactVnd(v).replace(" tỷ", "B").replace(" tr", "M")} />
+                <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip formatter={(v: number) => formatNumber(v)} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                 <Line type="monotone" dataKey="visitors" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={false} />
               </LineChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="p-5">
+            <h3 className="font-display font-bold mb-1">Tương quan Traffic ↔ Doanh thu</h3>
+            <p className="text-xs text-muted-foreground mb-3">Tactical — đánh giá chất lượng traffic theo ngày</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <ScatterChart>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" dataKey="visitors" name="Visitors" fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                <YAxis type="number" dataKey="revenue" name="Doanh thu" tickFormatter={(v) => formatCompactVnd(v)} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                <ZAxis type="number" dataKey="orders" range={[40, 200]} name="Đơn" />
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                  formatter={(v: number, n: string) => n === "Doanh thu" ? formatVnd(v) : formatNumber(v)} />
+                <Scatter data={series} fill="hsl(var(--chart-3))" />
+              </ScatterChart>
             </ResponsiveContainer>
           </Card>
         </section>
@@ -222,7 +247,7 @@ export default function BiDashboardPage() {
                 <h3 className="font-display font-bold">Top sản phẩm bán chạy (Drill-down)</h3>
                 <p className="text-xs text-muted-foreground">Operational/Tactical — quyết định nhập hàng & promotion</p>
               </div>
-              <Input placeholder="Tìm sản phẩm..." className="w-48 h-9" />
+              <Input placeholder="Tìm sản phẩm..." className="w-48 h-9" value={topSearch} onChange={(e) => setTopSearch(e.target.value)} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -237,7 +262,7 @@ export default function BiDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {top?.map((row, i) => {
+                  {top?.filter((r) => r.name.toLowerCase().includes(topSearch.toLowerCase())).map((row, i) => {
                     const up = row.growth >= 0;
                     return (
                       <tr key={row.productId} className="border-b last:border-0 hover:bg-muted/40">

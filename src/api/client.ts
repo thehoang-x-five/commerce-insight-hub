@@ -40,6 +40,7 @@ export interface ApiClient {
   createOrder(payload: {
     userId: string; customerName: string; customerPhone: string; shippingAddress: string;
     items: OrderItem[]; paymentMethod: Order["paymentMethod"];
+    discount?: number; couponCode?: string;
   }): Promise<Order>;
   updateOrderStatus(id: string, status: Order["status"]): Promise<Order>;
 
@@ -119,12 +120,14 @@ const mockApi: ApiClient = {
     await delay(500);
     const subtotal = payload.items.reduce((s, it) => s + it.price * it.quantity, 0);
     const shippingFee = subtotal > 5_000_000 ? 0 : 30_000;
+    const discount = payload.discount ?? 0;
+    const { discount: _d, couponCode: _c, ...rest } = payload;
     const order: Order = {
       id: `o${Date.now()}`,
       code: `DH${Date.now().toString().slice(-8)}`,
-      ...payload,
-      subtotal, shippingFee, discount: 0,
-      total: subtotal + shippingFee,
+      ...rest,
+      subtotal, shippingFee, discount,
+      total: Math.max(0, subtotal + shippingFee - discount),
       status: "pending",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
