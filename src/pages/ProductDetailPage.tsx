@@ -4,10 +4,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw, Minus, Plus, Heart, Share2 } from "lucide-react";
+import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw, Minus, Plus, Heart, GitCompare, Share2 } from "lucide-react";
 import { formatVnd, formatDate } from "@/lib/format";
 import { useCartStore } from "@/store/cart-store";
 import { useUiStore } from "@/store/ui-store";
+import { useWishlistStore } from "@/store/wishlist-store";
+import { useCompareStore } from "@/store/compare-store";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -19,6 +21,10 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1);
   const add = useCartStore((s) => s.add);
   const openCart = useUiStore((s) => s.openCart);
+  const wished = useWishlistStore((s) => product ? s.ids.includes(product.id) : false);
+  const toggleWish = useWishlistStore((s) => s.toggle);
+  const compared = useCompareStore((s) => product ? s.ids.includes(product.id) : false);
+  const toggleCompare = useCompareStore((s) => s.toggle);
 
   if (isLoading) {
     return (
