@@ -139,8 +139,14 @@ export default function ProductDetailPage() {
             >
               Mua ngay
             </Button>
-            <Button size="icon" variant="outline" className="h-11 w-11"><Heart className="h-4 w-4" /></Button>
-            <Button size="icon" variant="outline" className="h-11 w-11"><Share2 className="h-4 w-4" /></Button>
+            <Button size="icon" variant="outline" className={`h-11 w-11 ${wished ? "border-secondary text-secondary" : ""}`}
+              onClick={() => { toggleWish(product.id); toast.success(wished ? "Bỏ yêu thích" : "Đã thêm yêu thích"); }}>
+              <Heart className={`h-4 w-4 ${wished ? "fill-secondary" : ""}`} />
+            </Button>
+            <Button size="icon" variant="outline" className={`h-11 w-11 ${compared ? "border-info text-info" : ""}`}
+              onClick={() => { toggleCompare(product.id); }}>
+              <GitCompare className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
