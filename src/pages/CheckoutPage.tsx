@@ -11,8 +11,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card } from "@/components/ui/card";
 import { formatVnd } from "@/lib/format";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Tag, X, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import type { PaymentMethod } from "@/types/domain";
+import { applyCoupon, COUPONS, type Coupon } from "@/lib/coupons";
 
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
@@ -29,6 +31,9 @@ export default function CheckoutPage() {
     note: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("cod");
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const [discount, setDiscount] = useState(0);
 
   const enriched = useMemo(() => {
     if (!data) return [];
@@ -38,8 +43,25 @@ export default function CheckoutPage() {
   }, [items, data]);
 
   const subtotal = enriched.reduce((s, x) => s + x.product.price * x.quantity, 0);
-  const shipping = subtotal > 5_000_000 ? 0 : 30_000;
-  const total = subtotal + shipping;
+  const shipping = coupon?.code === "FREESHIP" ? 0 : (subtotal > 5_000_000 ? 0 : 30_000);
+  const total = Math.max(0, subtotal + shipping - discount);
+
+  const handleApplyCoupon = () => {
+    const r = applyCoupon(couponInput, subtotal);
+    if (r.error) {
+      toast.error(r.error);
+      return;
+    }
+    setCoupon(r.coupon);
+    setDiscount(r.discount);
+    toast.success(`Áp mã ${r.coupon!.code} thành công — giảm ${formatVnd(r.discount)}`);
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setDiscount(0);
+    setCouponInput("");
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +75,8 @@ export default function CheckoutPage() {
       customerPhone: form.customerPhone,
       shippingAddress: form.shippingAddress,
       paymentMethod: payment,
+      discount,
+      couponCode: coupon?.code,
       items: enriched.map((e) => ({
         productId: e.product.id, productName: e.product.name,
         thumbnail: e.product.thumbnail, price: e.product.price, quantity: e.quantity,
@@ -107,6 +131,42 @@ export default function CheckoutPage() {
               ))}
             </RadioGroup>
           </Card>
+
+          <Card className="p-5 space-y-3">
+            <h3 className="font-display font-bold flex items-center gap-2"><Tag className="h-4 w-4 text-secondary" /> Mã giảm giá</h3>
+            {coupon ? (
+              <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-success/10 border border-success/30">
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-success" />
+                  <span><strong>{coupon.code}</strong> — giảm {formatVnd(discount)}</span>
+                </div>
+                <Button type="button" size="sm" variant="ghost" onClick={removeCoupon}>
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input placeholder="Nhập mã giảm giá..." value={couponInput} onChange={(e) => setCouponInput(e.target.value)} />
+                <Button type="button" variant="outline" onClick={handleApplyCoupon}>Áp dụng</Button>
+              </div>
+            )}
+            <div className="text-xs space-y-1.5">
+              <p className="text-muted-foreground">Mã có sẵn (click để dùng):</p>
+              <div className="flex flex-wrap gap-1.5">
+                {COUPONS.map((c) => (
+                  <Badge
+                    key={c.code}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-secondary hover:text-secondary-foreground hover:border-secondary"
+                    onClick={() => setCouponInput(c.code)}
+                  >
+                    {c.code}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-muted-foreground italic">VD: TGDD10 (10% đơn từ 1tr), FREESHIP, SALE500K (đơn từ 10tr).</p>
+            </div>
+          </Card>
         </div>
 
         <Card className="p-5 h-fit lg:sticky lg:top-32 space-y-3">
@@ -125,6 +185,9 @@ export default function CheckoutPage() {
           <div className="border-t pt-2 space-y-1.5 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Tạm tính</span><span>{formatVnd(subtotal)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Vận chuyển</span><span>{shipping === 0 ? "Miễn phí" : formatVnd(shipping)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-success"><span>Giảm giá ({coupon?.code})</span><span>-{formatVnd(discount)}</span></div>
+            )}
             <div className="flex justify-between font-bold text-base pt-1 border-t"><span>Tổng</span><span className="text-secondary">{formatVnd(total)}</span></div>
           </div>
           <Button type="submit" size="lg" className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sale" disabled={createOrder.isPending}>
