@@ -32,6 +32,7 @@ export default function BiDashboardPage() {
   const [range, setRange] = useState("30");
   const [channel, setChannel] = useState<string>("all");
   const [region, setRegion] = useState<string>("all");
+  const [topSearch, setTopSearch] = useState("");
 
   const filters: BiFilters = useMemo(() => {
     const days = parseInt(range);
@@ -83,7 +84,15 @@ export default function BiDashboardPage() {
               <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
               <SelectContent>{REGIONS.map((r) => <SelectItem key={r} value={r}>{r === "all" ? "Toàn quốc" : r}</SelectItem>)}</SelectContent>
             </Select>
-            <Button size="sm" variant="outline"><Download className="h-3.5 w-3.5 mr-1" /> Export</Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              if (!series) return;
+              const rows = [["Ngày","Doanh thu","Đơn hàng","Lượt truy cập"], ...series.map(s => [s.date, String(s.revenue), String(s.orders), String(s.visitors)])];
+              const csv = "\uFEFF" + rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = `bi-revenue-${Date.now()}.csv`; a.click();
+              URL.revokeObjectURL(url);
+            }}><Download className="h-3.5 w-3.5 mr-1" /> Export CSV</Button>
           </div>
         </div>
       </header>
@@ -222,7 +231,7 @@ export default function BiDashboardPage() {
                 <h3 className="font-display font-bold">Top sản phẩm bán chạy (Drill-down)</h3>
                 <p className="text-xs text-muted-foreground">Operational/Tactical — quyết định nhập hàng & promotion</p>
               </div>
-              <Input placeholder="Tìm sản phẩm..." className="w-48 h-9" />
+              <Input placeholder="Tìm sản phẩm..." className="w-48 h-9" value={topSearch} onChange={(e) => setTopSearch(e.target.value)} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -237,7 +246,7 @@ export default function BiDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {top?.map((row, i) => {
+                  {top?.filter((r) => r.name.toLowerCase().includes(topSearch.toLowerCase())).map((row, i) => {
                     const up = row.growth >= 0;
                     return (
                       <tr key={row.productId} className="border-b last:border-0 hover:bg-muted/40">
