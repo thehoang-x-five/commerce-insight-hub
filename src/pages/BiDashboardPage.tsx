@@ -10,7 +10,7 @@ import {
 import { formatCompactVnd, formatNumber, formatPercent, formatVnd } from "@/lib/format";
 import {
   ResponsiveContainer, AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis,
-  Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend,
+  Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, ScatterChart, Scatter, ZAxis,
 } from "recharts";
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, DollarSign, Activity, Target,
@@ -206,19 +206,35 @@ export default function BiDashboardPage() {
           </Card>
         </section>
 
-        {/* Conversion / visitors mini */}
-        <section className="grid lg:grid-cols-3 gap-4">
-          <Card className="p-5 lg:col-span-3">
+        {/* Conversion / visitors / scatter */}
+        <section className="grid lg:grid-cols-2 gap-4">
+          <Card className="p-5">
             <h3 className="font-display font-bold mb-1">Lưu lượng truy cập</h3>
             <p className="text-xs text-muted-foreground mb-3">Operational — theo dõi sức khỏe traffic hằng ngày</p>
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={220}>
               <LineChart data={series}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" tickFormatter={(v) => v.slice(5)} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-                <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatCompactVnd(v).replace(" tỷ", "B").replace(" tr", "M")} />
+                <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip formatter={(v: number) => formatNumber(v)} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                 <Line type="monotone" dataKey="visitors" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={false} />
               </LineChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="p-5">
+            <h3 className="font-display font-bold mb-1">Tương quan Traffic ↔ Doanh thu</h3>
+            <p className="text-xs text-muted-foreground mb-3">Tactical — đánh giá chất lượng traffic theo ngày</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <ScatterChart>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" dataKey="visitors" name="Visitors" fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                <YAxis type="number" dataKey="revenue" name="Doanh thu" tickFormatter={(v) => formatCompactVnd(v)} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                <ZAxis type="number" dataKey="orders" range={[40, 200]} name="Đơn" />
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                  formatter={(v: number, n: string) => n === "Doanh thu" ? formatVnd(v) : formatNumber(v)} />
+                <Scatter data={series} fill="hsl(var(--chart-3))" />
+              </ScatterChart>
             </ResponsiveContainer>
           </Card>
         </section>
