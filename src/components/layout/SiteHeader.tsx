@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, User as UserIcon, MapPin, Phone, ChevronDown, BarChart3, Menu, Heart, GitCompare, FileText } from "lucide-react";
+import { Search, ShoppingCart, User as UserIcon, MapPin, Phone, ChevronDown, BarChart3, Menu, Heart, GitCompare } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
@@ -17,10 +17,9 @@ import {
 
 const QUICK_LINKS = [
   { label: "Khuyến mãi", to: "/promotions" },
-  { label: "Flash Sale", to: "/products?tag=flash" },
-  { label: "Trả góp 0%", to: "/promotions" },
+  { label: "Flash Sale", to: "/flash-sale" },
+  { label: "Trả góp 0%", to: "/installment" },
   { label: "Tin tức", to: "/news" },
-  { label: "📑 Báo cáo", to: "/report" },
 ];
 
 export function SiteHeader() {
@@ -45,9 +44,6 @@ export function SiteHeader() {
           </div>
           <div className="flex items-center gap-4">
             <Link to="/account/orders" className="hover:underline">Tra cứu đơn hàng</Link>
-            <NavLink to="/report" className="flex items-center gap-1 hover:underline">
-              <FileText className="h-3 w-3" /> Báo cáo HTTT
-            </NavLink>
             <NavLink to="/bi" className="flex items-center gap-1 hover:underline font-medium">
               <BarChart3 className="h-3 w-3" /> BI Dashboard
             </NavLink>
@@ -169,13 +165,19 @@ export function SiteHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
           {QUICK_LINKS.map((l) => (
-            <Link
+            <NavLink
               key={l.label}
               to={l.to}
-              className="px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-foreground/10 rounded-md whitespace-nowrap transition-base"
+              className={({ isActive }) =>
+                `px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-base ${
+                  isActive
+                    ? "bg-foreground/15 text-foreground shadow-sm"
+                    : "text-foreground/80 hover:text-foreground hover:bg-foreground/10"
+                }`
+              }
             >
               {l.label}
-            </Link>
+            </NavLink>
           ))}
         </div>
       </nav>

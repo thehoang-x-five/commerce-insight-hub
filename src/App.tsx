@@ -15,10 +15,11 @@ import LoginPage from "./pages/LoginPage";
 import AccountPage from "./pages/AccountPage";
 import WishlistPage from "./pages/WishlistPage";
 import ComparePage from "./pages/ComparePage";
-import ReportPage from "./pages/ReportPage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
 import PromotionsPage from "./pages/PromotionsPage";
+import FlashSalePage from "./pages/FlashSalePage";
+import InstallmentPage from "./pages/InstallmentPage";
 import OtpPage from "./pages/OtpPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -55,7 +56,8 @@ const App = () => (
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:slug" element={<NewsDetailPage />} />
             <Route path="/promotions" element={<PromotionsPage />} />
-            <Route path="/report" element={<ReportPage />} />
+            <Route path="/flash-sale" element={<FlashSalePage />} />
+            <Route path="/installment" element={<InstallmentPage />} />
           </Route>
 
           <Route path="/admin" element={<AdminLayout />}>

@@ -30,7 +30,7 @@ export function SiteFooter() {
             <li><Link to="#" className="hover:text-primary">Chính sách bảo hành</Link></li>
             <li><Link to="#" className="hover:text-primary">Chính sách đổi trả</Link></li>
             <li><Link to="#" className="hover:text-primary">Chính sách giao hàng</Link></li>
-            <li><Link to="#" className="hover:text-primary">Trả góp 0%</Link></li>
+            <li><Link to="/installment" className="hover:text-primary">Trả góp 0%</Link></li>
           </ul>
         </div>
 
@@ -55,7 +55,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-background/10">
         <div className="container py-4 text-xs text-background/60 flex flex-wrap gap-2 justify-between">
-          <span>© 2025 Mockup TGDĐ — Báo cáo cuối kỳ HTTT QL.</span>
+          <span>© 2025 Mockup TGDĐ — Website TMĐT demo.</span>
           <span>Mock data · Có cấu trúc dễ chuyển sang API thật.</span>
         </div>
       </div>
