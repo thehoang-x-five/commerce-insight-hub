@@ -37,9 +37,8 @@ export default function ReportPage() {
 
       <div className="container py-10 space-y-10">
         <Tabs defaultValue="yc1">
-          <TabsList className="grid grid-cols-3 max-w-2xl">
+          <TabsList className="grid grid-cols-2 max-w-xl">
             <TabsTrigger value="yc1">YC1: Doanh nghiệp & KHKD</TabsTrigger>
-            <TabsTrigger value="yc2">YC2: Phân tích HTTT</TabsTrigger>
             <TabsTrigger value="yc3">YC3: Báo cáo BI</TabsTrigger>
           </TabsList>
 
@@ -144,123 +143,8 @@ export default function ReportPage() {
             </Card>
           </TabsContent>
 
-          {/* YC2 — IS analysis */}
-          <TabsContent value="yc2" className="space-y-6 mt-6">
-            <Card className="p-6">
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2"><Layers className="h-5 w-5 text-info" /> Kiến trúc Hệ thống thông tin TGDĐ</h2>
-              <div className="space-y-3">
-                {[
-                  { lvl: "Strategic (CEO/Hội đồng QT)", color: "from-chart-1/20 to-chart-1/0", systems: ["EIS — Executive Information System", "BI Dashboard chiến lược", "Data Warehouse"], desc: "Hỗ trợ ra quyết định mở rộng thị trường, M&A, định hướng dài hạn." },
-                  { lvl: "Tactical (Trưởng phòng/Giám đốc khu vực)", color: "from-chart-3/20 to-chart-3/0", systems: ["MIS — Management Information System", "DSS — Decision Support System", "CRM phân tích"], desc: "Phân bổ ngân sách marketing, tối ưu danh mục sản phẩm, dự báo nhu cầu kho." },
-                  { lvl: "Operational (Nhân viên/Cửa hàng)", color: "from-chart-2/20 to-chart-2/0", systems: ["TPS — Transaction Processing", "POS — Point of Sale", "WMS — Warehouse Management", "OMS — Order Management"], desc: "Xử lý giao dịch hàng ngày: bán hàng, nhập kho, giao đơn, chăm sóc khách." },
-                ].map((l) => (
-                  <Card key={l.lvl} className={`p-5 bg-gradient-to-r ${l.color}`}>
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <Badge variant="outline">{l.lvl.split(" (")[0]}</Badge>
-                        <h3 className="font-display font-bold mt-2">{l.lvl.split(" (")[1]?.replace(")", "")}</h3>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-xl">{l.desc}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {l.systems.map((s) => <Badge key={s} className="bg-card text-foreground border">{s}</Badge>)}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </Card>
+          {/* YC2 đã loại bỏ — chỉ làm báo cáo, không có UI */}
 
-            <Card className="p-6">
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2"><Workflow className="h-5 w-5 text-info" /> Quy trình nghiệp vụ chính (Business Process)</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {[
-                  { Icon: ShoppingBag, t: "Quy trình bán hàng online", steps: ["KH duyệt sản phẩm", "Thêm vào giỏ", "Checkout & thanh toán", "OMS tạo đơn", "WMS soạn hàng", "Giao hàng", "Xác nhận giao thành công"] },
-                  { Icon: Truck, t: "Quy trình nhập kho", steps: ["Phòng kế hoạch lập đơn nhập", "PO gửi NCC", "NCC giao hàng", "Kiểm kê & nhập WMS", "Cập nhật stock vào ERP/Catalog"] },
-                  { Icon: Users, t: "Quy trình CSKH", steps: ["KH gửi yêu cầu (chat/hotline)", "CRM tiếp nhận ticket", "Phân loại & xử lý", "Phản hồi KH", "Khảo sát hài lòng"] },
-                  { Icon: BarChart3, t: "Quy trình phân tích & báo cáo", steps: ["TPS thu thập giao dịch", "ETL → Data Warehouse", "BI sinh KPI/Dashboard", "Manager review", "Ra quyết định"] },
-                ].map((p) => (
-                  <Card key={p.t} className="p-4">
-                    <h3 className="font-display font-bold mb-3 flex items-center gap-2"><p.Icon className="h-4 w-4 text-info" /> {p.t}</h3>
-                    <ol className="space-y-2 text-sm">
-                      {p.steps.map((s, i) => (
-                        <li key={s} className="flex gap-3">
-                          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-info text-info-foreground text-xs font-bold">{i + 1}</span>
-                          <span className="text-muted-foreground">{s}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </Card>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2"><Network className="h-5 w-5 text-info" /> Sơ đồ tích hợp hệ thống</h2>
-              <div className="overflow-x-auto">
-                <pre className="text-xs bg-foreground text-background p-5 rounded-lg leading-relaxed">{`
-  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-  │   Website   │  │  Mobile App │  │  POS/Store  │
-  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-         │                │                │
-         └────────┬───────┴────────────────┘
-                  ▼
-         ┌─────────────────┐    ┌──────────────┐
-         │   API Gateway   │◄──►│   CDN/Cache  │
-         └────────┬────────┘    └──────────────┘
-                  │
-       ┌──────────┼──────────┬──────────┬──────────┐
-       ▼          ▼          ▼          ▼          ▼
-  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-  │Catalog │ │  OMS   │ │  WMS   │ │  CRM   │ │Payment │
-  │ Service│ │ Orders │ │  Stock │ │Customer│ │Gateway │
-  └───┬────┘ └───┬────┘ └───┬────┘ └───┬────┘ └────────┘
-      │          │          │          │
-      └──────────┴────┬─────┴──────────┘
-                     ▼
-              ┌─────────────┐    ┌──────────────┐
-              │ PostgreSQL  │───►│   ETL Jobs   │
-              │  (OLTP DB)  │    └──────┬───────┘
-              └─────────────┘           ▼
-                                ┌──────────────┐
-                                │ Data Warehse │──► BI Dashboard
-                                │   (OLAP)     │     (Strategic)
-                                └──────────────┘
-`}</pre>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2"><Database className="h-5 w-5 text-info" /> Dữ liệu cốt lõi & các bên liên quan</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-display font-bold mb-3">Thực thể dữ liệu chính</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Product", "Category", "Customer", "Order", "OrderItem", "Payment", "Shipment", "Inventory", "Review", "Coupon", "Employee", "Store"].map((e) => (
-                      <Badge key={e} variant="outline" className="justify-center py-1.5">{e}</Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold mb-3">Stakeholders</h3>
-                  <ul className="space-y-2 text-sm">
-                    {[
-                      { r: "Khách hàng", a: "Mua sắm, đánh giá, theo dõi đơn" },
-                      { r: "Nhân viên CH", a: "POS, tư vấn, bảo hành" },
-                      { r: "Quản lý kho", a: "WMS, kiểm kê, soạn đơn" },
-                      { r: "Trưởng phòng", a: "MIS/DSS, báo cáo định kỳ" },
-                      { r: "Giám đốc/CEO", a: "BI Strategic, ra quyết định" },
-                      { r: "Nhà cung cấp", a: "Tích hợp PO/EDI" },
-                    ].map((s) => (
-                      <li key={s.r} className="flex justify-between border-b pb-1.5">
-                        <span className="font-medium">{s.r}</span>
-                        <span className="text-muted-foreground text-xs">{s.a}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
 
           {/* YC3 — BI */}
           <TabsContent value="yc3" className="space-y-6 mt-6">
