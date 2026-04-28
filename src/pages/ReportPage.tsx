@@ -3,9 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Target, TrendingUp, Layers, Database, Workflow, Network, ShieldCheck,
-  Users, ShoppingBag, Truck, BarChart3, Brain, ArrowRight, Lightbulb,
-  Building2, Globe, Smartphone, Cpu,
+  Target, TrendingUp, ShoppingBag, Brain, ArrowRight, Lightbulb,
+  Building2, Globe, Smartphone, Cpu, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
