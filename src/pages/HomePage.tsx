@@ -3,11 +3,14 @@ import { useProducts, useCategories } from "@/services/queries";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import {
   Smartphone, Laptop, Tablet, Headphones, Watch, Tv, Camera, Refrigerator,
-  Truck, ShieldCheck, CreditCard, RotateCcw, Zap, ArrowRight, Flame,
+  Truck, ShieldCheck, CreditCard, RotateCcw, Zap, ArrowRight, Flame, Newspaper, Calendar,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { newsArticles, promotions } from "@/api/news-data";
+import { formatDate } from "@/lib/format";
 
 const ICON_MAP: Record<string, typeof Smartphone> = {
   Smartphone, Laptop, Tablet, Headphones, Watch, Tv, Camera, Refrigerator,
@@ -128,7 +131,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured */}
-      <section className="container pb-16">
+      <section className="container pb-10">
         <div className="flex items-end justify-between mb-5">
           <h2 className="font-display text-2xl md:text-3xl font-bold">Bán chạy nhất</h2>
           <Link to="/products" className="text-sm text-secondary font-medium hover:underline">Xem tất cả</Link>
@@ -137,6 +140,55 @@ export default function HomePage() {
           {isLoading
             ? Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-lg" />)
             : featured?.items.map((p) => <ProductCard key={p.id} product={p} />)}
+        </div>
+      </section>
+
+      {/* Promotions widget */}
+      <section className="container pb-10">
+        <div className="flex items-end justify-between mb-5">
+          <h2 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2"><Flame className="h-6 w-6 text-secondary" /> Khuyến mãi HOT</h2>
+          <Link to="/promotions" className="text-sm text-secondary font-medium hover:underline">Xem tất cả →</Link>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {promotions.slice(0, 4).map((p) => (
+            <Link key={p.id} to="/promotions">
+              <Card className="overflow-hidden hover:shadow-card-hover transition-base h-full">
+                <div className="aspect-video bg-surface relative overflow-hidden">
+                  <img src={p.cover} alt={p.title} className="h-full w-full object-cover" />
+                  <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground border-0">{p.badge}</Badge>
+                </div>
+                <div className="p-3">
+                  <p className="font-display font-bold text-sm line-clamp-1">{p.title}</p>
+                  <p className="text-xs text-secondary font-semibold mt-1">{p.discountText}</p>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* News widget */}
+      <section className="container pb-16">
+        <div className="flex items-end justify-between mb-5">
+          <h2 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2"><Newspaper className="h-6 w-6 text-primary" /> Tin tức công nghệ</h2>
+          <Link to="/news" className="text-sm text-secondary font-medium hover:underline">Xem tất cả →</Link>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {newsArticles.slice(0, 3).map((a) => (
+            <Link key={a.id} to={`/news/${a.slug}`}>
+              <Card className="overflow-hidden hover:shadow-card-hover transition-base h-full">
+                <div className="aspect-video bg-surface overflow-hidden">
+                  <img src={a.cover} alt={a.title} className="h-full w-full object-cover hover:scale-105 transition-transform" />
+                </div>
+                <div className="p-4">
+                  <Badge variant="outline" className="mb-2">{a.category}</Badge>
+                  <h3 className="font-display font-bold mb-2 line-clamp-2 leading-snug">{a.title}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{a.excerpt}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(a.publishedAt)}</p>
+                </div>
+              </Card>
+            </Link>
+          ))}
         </div>
       </section>
     </div>

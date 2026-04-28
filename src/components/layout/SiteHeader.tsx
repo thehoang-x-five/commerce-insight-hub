@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const QUICK_LINKS = [
-  { label: "Khuyến mãi", to: "/products?sort=newest" },
+  { label: "Khuyến mãi", to: "/promotions" },
   { label: "Flash Sale", to: "/products?tag=flash" },
-  { label: "Trả góp 0%", to: "#" },
-  { label: "Tin tức", to: "#" },
-  { label: "📑 Báo cáo HTTT", to: "/report" },
+  { label: "Trả góp 0%", to: "/promotions" },
+  { label: "Tin tức", to: "/news" },
+  { label: "📑 Báo cáo", to: "/report" },
 ];
 
 export function SiteHeader() {

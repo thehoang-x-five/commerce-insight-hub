@@ -16,6 +16,11 @@ import AccountPage from "./pages/AccountPage";
 import WishlistPage from "./pages/WishlistPage";
 import ComparePage from "./pages/ComparePage";
 import ReportPage from "./pages/ReportPage";
+import NewsPage from "./pages/NewsPage";
+import NewsDetailPage from "./pages/NewsDetailPage";
+import PromotionsPage from "./pages/PromotionsPage";
+import OtpPage from "./pages/OtpPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
@@ -41,10 +46,15 @@ const App = () => (
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-success" element={<OrderSuccessPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/otp" element={<OtpPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/orders" element={<AccountPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/compare" element={<ComparePage />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/news/:slug" element={<NewsDetailPage />} />
+            <Route path="/promotions" element={<PromotionsPage />} />
             <Route path="/report" element={<ReportPage />} />
           </Route>
 
